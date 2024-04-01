@@ -56,7 +56,7 @@ const roleBuilder = {
                 });
             }
             if ((creep.withdraw(source, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE)) {
-                creep.travelTo(source, {reusePath: 10});
+                creep.travelTo(source, {reusePath: 25});
             }
         }
     }

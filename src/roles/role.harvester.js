@@ -6,12 +6,15 @@ const roleHarvester = {
             const sources = creep.room.find(FIND_SOURCES);
             for (let i = 0; i < sources.length; i++) {
                 const creepsUsing = _.filter(Game.creeps, (creep) => creep.memory.using === sources[i].id);
-                const freeSpaces = calculateFreeSpaces(sources[i]);
-                if (creepsUsing.length < freeSpaces) {
+                if (creepsUsing.length < 1) {
                     creep.memory.using = sources[i].id;
                     break;
                 }
             }
+        }
+
+        if (creep.renew()) {
+            return;
         }
 
         const source = Game.getObjectById(creep.memory.using);
@@ -19,6 +22,11 @@ const roleHarvester = {
             if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
                 creep.travelTo(source);
             }
+            const target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return (
+                        (structure.structureType === STRUCTURE_CONTAINER));}});
+            creep.transfer(target, RESOURCE_ENERGY);
         } else {
             const target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
                 filter: (structure) => {

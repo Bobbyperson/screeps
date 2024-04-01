@@ -8,6 +8,8 @@ const roleLDHarvester = {
             creep.memory.sourceRoom = null;
         }
 
+        creep.sos();
+
         // Switch states
         if (!creep.memory.working && creep.store[RESOURCE_ENERGY] === 0) {
             creep.memory.working = true;
@@ -57,7 +59,7 @@ const roleLDHarvester = {
                 return;
             }
         } else if (creep.room.name !== targetRoomName) {
-            creep.travelTo(new RoomPosition(25, 25, targetRoomName), { visualizePathStyle: { stroke: '#ffaa00' } });
+            creep.travelTo(new RoomPosition(25, 25, targetRoomName), { visualizePathStyle: { stroke: '#ffaa00', reusePath: 50 } });
         } else {
             creep.say('bruh');
         }

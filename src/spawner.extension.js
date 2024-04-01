@@ -5,26 +5,17 @@ class SpawnerExtension {
      * @returns int
      */
     static canSpawn(spawn, body) {
-        spawn.room.find(FIND_STRUCTURES, {
-            filter: (s) => s.structureType === STRUCTURE_EXTENSION && s.store.getFreeCapacity(RESOURCE_ENERGY) > 0
-        });
-        // sum total energy in extensions
-        let total = 0;
-        extensions.forEach(extension => {
-            total += extension.store.getFreeCapacity(RESOURCE_ENERGY);
-        });
-        if (total > this.bodyCost(body)) {
-            return true;
+        if (spawn.spawning) return ERR_BUSY;
+        if (!Game.spawns['Spawn1'].spawnCreep(body, 'Worker1', { dryRun: true }))  {
+            return ERR_NOT_ENOUGH_ENERGY;
         }
-        return false;
+        return OK;
     }
-
-    static bodyCost(body) {
-        let cost = 0;
-        body.forEach(part => {
-            cost += BODYPART_COST[part];
-        });
-        return cost;
+    static maxEnergy(spawn) {
+        return spawn.room.energyCapacityAvailable;
+    }
+    static energy(spawn) {
+        return spawn.room.energyAvailable;
     }
 }
 

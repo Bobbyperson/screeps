@@ -31,7 +31,7 @@ const roleWallRepair = {
                 });
                 if (structure) {
                     if (creep.repair(structure) === ERR_NOT_IN_RANGE) {
-                        creep.travelTo(structure);
+                        creep.travelTo(structure, {range: 3, reusePath: 20});
                     } else {
                         creep.giveWay({pos: structure.pos, range: 3});
                     }

@@ -10,11 +10,15 @@ const roleUpgrader = {
             creep.memory.upgrading = true;
         }
 
+        if (creep.renew()) {
+            return;
+        }
+
         if (!creep.memory.upgrading) {
             creep.withdrawFromAny();
         } else {
             if (creep.upgradeController(creep.room.controller) === ERR_NOT_IN_RANGE){
-                creep.travelTo(creep.room.controller);
+                creep.travelTo(creep.room.controller, {range: 3, reusePath: 20});
             } else {
                 creep.giveWay({pos: creep.room.controller.pos, range: 3 });
             }

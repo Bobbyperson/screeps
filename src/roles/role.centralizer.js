@@ -9,6 +9,10 @@ const roleCentralizer = {
         if (!creep.memory.transfer && creep.store.getFreeCapacity() === 0) {
             creep.memory.transfer = true;
         }
+        
+        if (creep.renew()) {
+            return;
+        }
 
         if (!creep.memory.transfer) {
             creep.withdrawFromMany([STRUCTURE_CONTAINER]);

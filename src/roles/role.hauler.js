@@ -9,13 +9,16 @@ const roleHauler = {
         if (!creep.memory.transfer && creep.store.getFreeCapacity() === 0) {
             creep.memory.transfer = true;
         }
-
+        if (creep.renew()) {
+            return;
+        }
         if (!creep.memory.transfer) {
             creep.withdrawFromMany([STRUCTURE_CONTAINER, STRUCTURE_STORAGE]);
         } else {
             if (!creep.depositToMany([STRUCTURE_EXTENSION, STRUCTURE_SPAWN])) {
                 creep.depositToMany([STRUCTURE_TOWER]);
             }
+            creep.giveWay();
         }
     }
 };

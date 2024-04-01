@@ -15,6 +15,12 @@ const roleLDTruck = {
             creep.memory.working = false;
         }
 
+        creep.sos();
+
+        if (creep.renew()) {
+            return;
+        }
+
         // Harvesting mode
         if (creep.memory.working) {
             if (!creep.memory.assignedSource) {
@@ -56,7 +62,7 @@ const roleLDTruck = {
                 return;
             }
         } else if (creep.room.name !== targetRoomName) {
-            creep.travelTo(new RoomPosition(25, 25, targetRoomName), { visualizePathStyle: { stroke: '#ffaa00' } });
+            creep.travelTo(new RoomPosition(25, 25, targetRoomName), { visualizePathStyle: { stroke: '#ffaa00' }, reusePath: 50 });
         } else {
             creep.say('bruh');
         }
