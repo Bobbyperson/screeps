@@ -10,16 +10,17 @@ var roleLDHarvester = require('./roles/role.ldharvester')
 var roleCentralizer = require('./roles/role.centralizer');
 var roleScout = require('./roles/role.scout');
 var roleLDTruck = require('./roles/role.ldtruck');
-var StorageAnalyzer = require('./storageAnalyzer');
+var roleReserver = require('./roles/role.reserver');
+var StorageAnalyzer = require('./utils/storageAnalyzer');
 var structureTower = require('./structure.tower')
 var roleDefender = require('./roles/role.defender');
 var roleDefenderHealer = require('./roles/role.defenderHealer');
-var excuseMe = require('./excuseMe');
-var profiler = require('./screeps-profiler');
-var { calculateFreeSpaces, getBodyCost } = require('./utils');
-require('./stuckRepather');
-require('./Traveler');
-require('./jobs.common');
+var excuseMe = require('./utils/excuseMe');
+var profiler = require('./utils/screeps-profiler');
+var { calculateFreeSpaces, getBodyCost } = require('./utils/utils');
+require('./utils/stuckRepather');
+require('./utils/Traveler');
+require('./utils/jobs.common');
 require('./spawner.extension');
 
 let newName;
@@ -39,7 +40,7 @@ module.exports.loop = function () {
                 role: 'harvester',
                 //body: [MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,WORK,WORK,WORK,WORK,WORK,WORK,CARRY],
                 body: [MOVE, WORK, WORK],
-                desiredAmount: 4,
+                desiredAmount: 0,
                 priority: 1,
             },
             upgrader: {
@@ -70,7 +71,7 @@ module.exports.loop = function () {
                 role: 'hauler',
                 // body: [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE],
                 body: getCreepBody({ CARRY: 6, MOVE: 3 }),
-                desiredAmount: 1,
+                desiredAmount: 2,
                 priority: 2,
             },
             wallRepair: {
@@ -84,7 +85,7 @@ module.exports.loop = function () {
             truck: {
                 role: 'truck',
                 // body: [CARRY, MOVE, CARRY, MOVE],
-                body: getCreepBody({ CARRY: 2, MOVE: 2 }),
+                body: getCreepBody({ CARRY: 4, MOVE: 2 }),
                 desiredAmount: 4,
                 spawnCondition: _.filter(Game.spawns['Spawn1'].room.find(FIND_DROPPED_RESOURCES)).length > 0,
                 priority: 2,
@@ -98,41 +99,41 @@ module.exports.loop = function () {
             LDHarvester: {
                 role: 'LDHarvester',
                 // body: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
-                body: getCreepBody({ WORK: 3, MOVE: 3 }),
+                body: getCreepBody({ WORK: 6, MOVE: 3 }),
                 // body: [WORK,CARRY,MOVE,MOVE],
-                spawnCondition: _.filter(Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS)).length === 0,
-                desiredAmount: 2,
+                spawnCondition: _.filter(Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS)).length === 0 && _.filter(Memory.rooms, (room) => room.sos).length === 0,
+                desiredAmount: 0,
                 priority: 10,
             },
             LDTruck: {
                 role: 'LDTruck',
-                body: getCreepBody({ CARRY: 5, MOVE: 5 }),
-                spawnCondition: _.filter(Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS)).length === 0,
-                desiredAmount: 2,
+                body: getCreepBody({ CARRY: 8, MOVE: 8 }),
+                spawnCondition: _.filter(Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS)).length === 0 && _.filter(Memory.rooms, (room) => room.sos).length === 0,
+                desiredAmount: 0,
                 priority: 11,
             },
             centralizer: {
                 role: 'centralizer',
                 // body: [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE],
                 body: getCreepBody({ CARRY: 8, MOVE: 4 }),
-                desiredAmount: 1,
+                desiredAmount: 0,
                 priority: 98,
             },
             defender: {
                 role: 'defender',
                 // body: [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, MOVE, MOVE, MOVE, MOVE],
-                body: getCreepBody({ TOUGH: 5, RANGED_ATTACK: 3, MOVE: 4 }),
+                body: getCreepBody({ TOUGH: 5, RANGED_ATTACK: 3, MOVE: 8 }),
                 desiredAmount: 3,
-                spawnCondition: _.filter(Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS)).length > 0,
+                spawnCondition: _.filter(Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS)).length > 0 || _.filter(Memory.rooms, (room) => room.sos).length > 0,
                 priority: 10,
             },
             defenderHealer: {
                 role: 'defenderHealer',
                 // body: [HEAL, HEAL, HEAL, HEAL, MOVE, MOVE],
-                body: getCreepBody({ HEAL: 4, MOVE: 2 }),
-                desiredAmount: 3,
-                spawnCondition: _.filter(Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS)).length > 0,
-                priority: 11,
+                body: getCreepBody({ HEAL: 4, MOVE: 4 }),
+                desiredAmount: _.filter(Game.creeps, (creep) => creep.memory.role === 'defender').length,
+                spawnCondition: _.filter(Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS)).length > 0 || _.filter(Memory.rooms, (room) => room.sos).length > 0,
+                priority: 9,
             },
             scout: {
                 role: 'scout',
@@ -140,6 +141,13 @@ module.exports.loop = function () {
                 desiredAmount: 1,
                 spawnCondition: _.filter(Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS)).length === 0,
                 priority: 99,
+            },
+            reserver: {
+                role: 'reserver',
+                body: getCreepBody({ CLAIM: 2, MOVE: 2 }),
+                desiredAmount: 0,
+                spawnCondition: _.filter(Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS)).length === 0 && _.filter(Memory.rooms, (room) => room.sos).length === 0,
+                priority: 100,
             }
         };
 
@@ -160,18 +168,21 @@ module.exports.loop = function () {
             }
         }
         screepTypes.LDHarvester.desiredAmount = desiredLDHarvesters;
+        screepTypes.LDTruck.desiredAmount = desiredLDHarvesters;
+        screepTypes.reserver.desiredAmount = desiredLDHarvesters;
 
         for (const role in screepTypes) {
             if (screepTypes.hasOwnProperty(role)) {
                 // Calculate and assign the amountAlive property
                 screepTypes[role].screepsAlive = _.filter(Game.creeps, (creep) => creep.memory.role === screepTypes[role].role && creep.ticksToLive > screepTypes[role].body.length * 3);
-                if (role === 'harvester' || role === 'LDHarvester' || role === 'LDTruck') {
+                if (role === 'harvester' || role === 'LDHarvester' || role === 'LDTruck' || role === 'reserver') {
                     screepTypes[role].screepsAlive = _.filter(Game.creeps, (creep) => creep.memory.role === screepTypes[role].role);
                 }
             }
         }
-
-        doSpawning(screepTypes);
+        // if (Game.time % 10 === 0) {
+            doSpawning(screepTypes);
+        // }
 
         const spawn = Game.spawns['Spawn1'];
         if (spawn && Game.time % 500 === 0) {
@@ -239,6 +250,9 @@ function runCreeps() {
                 case 'LDTruck':
                     roleLDTruck.run(creep);
                     break;
+                case 'reserver':
+                    roleReserver.run(creep);
+                    break;
                 default:
                     console.log('Creep role not found!');
                     break;
@@ -258,7 +272,21 @@ function doSpawning(screepTypes) {
                 }
             }
             if (screepTypes[role].screepsAlive.length < screepTypes[role].desiredAmount && shouldSpawn === true && screepTypes[role].priority <= spawnPriority) {
-                newName = role + Game.time;
+                var newName;
+                var counter = 0;
+                var done = false;
+                while (!done) {
+                    done = true;
+                    for (const creep in Game.creeps) {
+                        if (creep === role + counter) {
+                            done = false;
+                            counter++;
+                            break;
+                        }
+                    }
+                    console.log('done: ' + done + ' counter: ' + counter + ' role: ' + role);
+                }
+                newName = role + counter;
                 spawnPriority = screepTypes[role].priority;
                 //console.log(`Spawning new ${role}: ` + newName);
                 if (role === 'harvester') {
@@ -274,7 +302,7 @@ function doSpawning(screepTypes) {
                             break;
                         }
                     }
-                    desiredBody = getCreepBody({ WORK: 5, MOVE: 2 });
+                    desiredBody = getCreepBody({ WORK: 5, CARRY: 1, MOVE: 3 });
                     // to empty out a source, 5 total WORK body parts are needed, take away body parts the more free spaces there are
                     // switch (freeSpaces) {
                     //     case 1:
@@ -289,7 +317,7 @@ function doSpawning(screepTypes) {
                     // }
                     Game.spawns['Spawn1'].spawnCreep(desiredBody, newName,
                         { memory: { role: role, using: desired } });
-                } else if (role === 'LDHarvester' || role === 'LDTruck') {
+                } else if (role === 'LDHarvester' || role === 'LDTruck' || role === 'reserver') {
                     // get adjacent rooms
                     // check if there are sources in room using memory.rooms
                     // 3 ld harvesters per source, check amount using creep memory
@@ -405,7 +433,7 @@ function planRoadsFromSpawn(spawn) {
 function analyzeStorage() {
     for (const roomName in Game.rooms) {
         if (Game.rooms[roomName] && Game.rooms[roomName].storage) {
-            const storageAnalyzer = new StorageAnalyzer('Storage_' + roomName, 2000);
+            const storageAnalyzer = new StorageAnalyzer('Storage_' + roomName, 1000);
             storageAnalyzer.analyze(Game.rooms[roomName]);
             const storage = Game.rooms[roomName].storage;
             const rateOfChange = storageAnalyzer.getRateOfChange().toFixed(2); // Fixed to 2 decimal places for readability
