@@ -1,4 +1,3 @@
-// const StorageAnalyzer = require("./storageAnalyzer");
 class utils {
     static transferEnergyToClosestLink(room) {
         const storage = room.storage;
