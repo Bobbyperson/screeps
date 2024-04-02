@@ -104,6 +104,30 @@ class JobsCommon {
     }
 
     /**
+     * withdraw from fullest
+     * @param creep
+     * @returns boolean
+     */
+    static withdrawFromFullest(creep, types) {
+        var storage;
+        if (!creep.memory.destination) {
+            storage = creep.room.find(FIND_STRUCTURES, {
+                filter: (s) => types.includes(s.structureType) && s.store.getUsedCapacity(RESOURCE_ENERGY) >= creep.store.getCapacity()
+            });
+            if (storage.length === 0) return false;
+            storage.sort((a, b) => b.store.getUsedCapacity(RESOURCE_ENERGY) - a.store.getUsedCapacity(RESOURCE_ENERGY));
+            creep.memory.destination = storage[0].id;
+        }
+        const destination = Game.getObjectById(creep.memory.destination);
+        if (creep.withdraw(destination, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE && destination.store.getUsedCapacity(RESOURCE_ENERGY) >= creep.store.getCapacity()) {
+            creep.travelTo(destination, { reusePath: 10 });
+        } else {
+            delete creep.memory.destination;
+        }
+        return true;
+    }
+
+    /**
      * deposit to any
      * @param creep
      * @returns boolean
@@ -193,6 +217,9 @@ Creep.prototype.depositToAny = function () {
 Creep.prototype.withdrawFromMany = function (types) {
     return JobsCommon.withdrawFromMany(this, types);
 };
+Creep.prototype.withdrawFromFullest = function (types) {
+    return JobsCommon.withdrawFromFullest(this, types);
+}
 Creep.prototype.depositToMany = function (types) {
     return JobsCommon.depositToMany(this, types);
 };

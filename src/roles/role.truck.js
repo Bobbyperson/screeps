@@ -49,7 +49,7 @@ const roleTruck = {
                 }
             }
             if (creep.memory.centralizer) {
-                creep.withdrawFromMany([STRUCTURE_CONTAINER]);
+                creep.withdrawFromFullest([STRUCTURE_CONTAINER]);
             }
         } else {
             if (!creep.memory.centralizer) {
