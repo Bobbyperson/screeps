@@ -31,6 +31,13 @@ profiler.enable()
 module.exports.loop = function () {
     profiler.wrap(function () {
         // Main.js logic should go here.
+
+        // activate safe mode if enemy creeps are within 5 tiles of the spawn
+        if (Game.spawns['Spawn1'].pos.findInRange(FIND_HOSTILE_CREEPS, 5).length > 0 && !Game.spawns['Spawn1'].room.controller.safeMode && Game.spawns['Spawn1'].room.controller.safeModeAvailable > 0) {
+            Game.spawns['Spawn1'].room.controller.activateSafeMode();
+        }
+
+
         handleDeadCreeps();
 
         analyzeStorage();
@@ -99,7 +106,7 @@ module.exports.loop = function () {
             LDHarvester: {
                 role: 'LDHarvester',
                 // body: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
-                body: getCreepBody({ WORK: 6, MOVE: 3 }),
+                body: getCreepBody({ WORK: 5, MOVE: 3 }),
                 // body: [WORK,CARRY,MOVE,MOVE],
                 spawnCondition: _.filter(Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS)).length === 0 && _.filter(Memory.rooms, (room) => room.sos).length === 0,
                 desiredAmount: 0,
@@ -168,7 +175,7 @@ module.exports.loop = function () {
             }
         }
         screepTypes.LDHarvester.desiredAmount = desiredLDHarvesters;
-        screepTypes.LDTruck.desiredAmount = desiredLDHarvesters;
+        screepTypes.LDTruck.desiredAmount = desiredLDHarvesters * 2;
         screepTypes.reserver.desiredAmount = desiredLDHarvesters;
 
         for (const role in screepTypes) {
@@ -325,13 +332,17 @@ function doSpawning(screepTypes) {
                     const adjacentRooms = Game.map.describeExits(Game.spawns['Spawn1'].room.name);
                     var desired;
                     var desiredRoom;
+                    var max = 1;
+                    if (role === 'LDTruck') {
+                        max = 2;
+                    }
                     for (var room in adjacentRooms) {
                         room = directionToAdjacentRoom(Game.spawns['Spawn1'].room.name, room);
                         if (Memory.rooms[room] && Memory.rooms[room].sources) {
                             const sources = Memory.rooms[room].sources;
                             for (let i = 0; i < sources.length; i++) {
                                 const creepsUsing = _.filter(Game.creeps, (creep) => creep.memory.assignedSource === sources[i] && creep.memory.role === role);
-                                if (creepsUsing.length < 1) {
+                                if (creepsUsing.length < max) {
                                     desired = sources[i];
                                     desiredRoom = room;
                                     break;
