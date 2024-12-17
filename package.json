@@ -23,7 +23,7 @@
     "@babel/preset-env": "^7.24.0",
     "@rollup/plugin-commonjs": "^28.0.1",
     "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-node-resolve": "^16.0.0",
     "@types/lodash": "^4.17.12",
     "@types/screeps": "^3.3.7",
     "eslint": "^9.13.0",
