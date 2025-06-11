@@ -27,7 +27,7 @@
     "@types/lodash": "^4.17.12",
     "@types/screeps": "^3.3.7",
     "eslint": "^9.13.0",
-    "jest": "^29.7.0",
+    "jest": "^30.0.0",
     "lodash": "^4.17.21",
     "prettier": "^3.2.5",
     "rollup": "^4.12.1",
