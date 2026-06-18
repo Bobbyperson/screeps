@@ -19,7 +19,7 @@
     "watch-sim": "rollup -cw --environment DEST:sim"
   },
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.23.3",
+    "@babel/plugin-transform-modules-commonjs": "^8.0.1",
     "@babel/preset-env": "^7.24.0",
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-json": "^6.1.0",
